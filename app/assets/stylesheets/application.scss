@@ -1,0 +1,108 @@
+/*
+ * This is a manifest file that'll be compiled into application.css, which will include all the files
+ * listed below.
+ *
+ * Any CSS and SCSS file within this directory, lib/assets/stylesheets, or any plugin's
+ * vendor/assets/stylesheets directory can be referenced here using a relative path.
+ *
+ * You're free to add application-wide styles to this file and they'll appear at the bottom of the
+ * compiled file so the styles you add here take precedence over styles defined in any other CSS/SCSS
+ * files in this directory. Styles in this file should be added after the last require_* statement.
+ * It is generally better to create a new file per style scope.
+ *
+ *= require_tree .
+ *= require_self
+ */
+
+
+
+ 		.clue{
+ 			height: 50px;
+ 			text-align: center;
+ 			background: rgb(0,0,165);
+ 			display: flex;
+ 			align-items: center;
+ 			justify-content: center;
+ 			margin: 5px;
+ 			color: rgb(233,162,123);
+ 		}
+ 		div.col-md-2{
+ 			padding-left: 0px;
+ 			padding-right: 0px;
+ 		}
+ 		h4 {
+ 			text-align: center;
+ 			background: rgb(0,0,165);
+ 			font-size: .8em;
+ 		}
+ 		.category{
+ 			min-height: 77px;
+ 			background: rgb(0,0,165);
+ 			display: flex;
+ 			align-items: center;
+ 			justify-content: center;
+ 			margin: 5px;
+ 			color: white;
+ 		}
+ 		#game-board{
+ 			background-color: black;
+ 		}
+ 		#question{
+ 			background: rgb(0,0,165);
+ 			justify-content: center;
+ 			align-items: center;
+ 			text-align: center;
+ 			color: white;
+ 			display: flex;
+ 			height: 95%;
+ 			font-family: 'Tinos', serif;
+ 			background-size: 100%;
+ 		}
+ 		#clue-display{
+ 			height: 300px;
+ 			display: flex;
+ 			align-items: center;
+ 		}
+ 		#rhs{
+ 			justify-content: center;
+ 			align-items: center;
+ 			align-content: center;
+ 			text-align: center;
+ 		}
+ 		#welcome{
+ 			background-image: url(../images/jeopardy_title.jpg);
+ 			height: 500px;
+ 			background-size: 100%;
+ 			display: flex;
+ 			justify-content: center;
+ 			color: white;
+ 		}
+ 		#username{
+ 			margin-top: 70px;
+ 			color: black;
+ 		}
+ 		#welcome-message{
+ 			padding-top: 50px;
+ 		}
+ 		div.well{
+ 			display: flex;
+ 			align-items: center;
+ 			justify-content: center;
+ 			background-color: rgb(0,0,165) ;
+ 			color: rgb(233,162,123);
+ 			font-size: 2em;
+ 			min-height: 87.5px;
+ 			max-width: 80px;
+ 			float: unset;
+ 			margin: auto;
+ 		}
+ 		#user-display{
+ 			text-align: center;
+ 			font-size: 2em;
+ 			height: 80px;
+ 			margin-top: 20px;
+ 			font-family: 'Permanent Marker', cursive;
+ 		}
+ 		#input{
+ 			padding-bottom: 30px;
+ 		}
