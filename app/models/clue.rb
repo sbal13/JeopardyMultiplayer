@@ -1,5 +1,5 @@
 class Clue < ApplicationRecord
 	belongs_to :category
-	has_many :gameclues
-	has_many :games, through: :gameclues
+	has_many :game_clues
+	has_many :games, through: :game_clues
 end
