@@ -1,8 +1,9 @@
 const Timer = (function createTimer(){
-  const presentTime = $('#timer')
 
   return class Timer {
-    constructor(clue){
+    constructor(clue, display){
+      this.presentTime = $('#timer')
+      this.display = display
       this.clue = clue
       this.seconds = 11
       this.goTimer = setInterval(function(){this.run()}.bind(this), 1000)
@@ -15,9 +16,9 @@ const Timer = (function createTimer(){
         this.stop()
         this.ranOutOfTime()
         checkEndGame()
-        backToGame()
+        backToGame(this.display)
       } else {
-        presentTime.html(this.seconds)
+        this.presentTime.html(this.seconds)
       }
     }
 
@@ -28,7 +29,7 @@ const Timer = (function createTimer(){
 
     stop(){
       clearInterval(this.goTimer);
-      presentTime.html("")
+      this.presentTime.html("")
     }
   }
 })()

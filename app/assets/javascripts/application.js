@@ -10,66 +10,70 @@
 // Read Sprockets README (https://github.com/rails/sprockets#sprockets-directives) for details
 // about supported directives.
 //
-//= require rails-ujs
+
 //= require turbolinks
-//= require_tree .
+//= require jquery
+//= require rails-ujs
+//= require display.js
+//= require cable.js
+//= require category.js
+//= require clue.js
+//= require timer.js
+//= require user.js
+
+
 
 
 document.addEventListener('DOMContentLoaded', function(){
-	loadScreen()
+  const display = new Display()
+	loadScreen(display)
 })
 
-const screen = $('#game-screen')
-const welcome = $('#welcome')
-const board = $('#game-board')
 
-const clueDisplay = $("#clue-display")
-const questionDisplay = $("#question")
-const rhs = $("#rhs")
-const inputDisplay = $("#input")
-const timerDisplay = $("#timer-div")
-
-const userDisplay = $("#user-display")
 var currentUser;
 
-function loadScreen(){
-	clueDisplay.hide()
-	welcome.html('<h2 id="welcome-message"> Click here to start! </h2>')
+function loadScreen(display){
+
+	display.clue.hide()
+	display.welcome.html('<h2 id="welcome-message"> Click here to start! </h2>')
 	$('#welcome-message').on('click',function() {
-		promptUsername()
+		promptUsername(display)
 	})
 }
 
 
-function promptUsername(){
+function promptUsername(display){
 	const userForm = `
 			<form id="user-form">
-			<input type="text" id="username" placeholder="enter your name">
+			   <input type="text" id="username" placeholder="enter your name">
 			</form>
 	`
-	welcome.html(userForm)
+	display.welcome.html(userForm)
+  $('#username').focus()
 	$('#user-form').on('submit', function(event){
 		event.preventDefault()
 		const userName = $('#username').val()
 		currentUser = new User(userName)
-		userDisplay.html(`${currentUser.name.toUpperCase()}: $${currentUser.score}`)
-		welcome.html("")
-		welcome.hide()
-		setCategories()
+		display.user.html(`${currentUser.name.toUpperCase()}: $${currentUser.score}`)
+		display.welcome.html("")
+		display.welcome.hide()
+    $('#username').blur()
+		setCategories(display)
+
 	})
 }
 
 
 
-function setCategories(){
+function setCategories(display){
 
 	fetch("http://localhost:3000/api/v1/categories")
 	.then(res=> res.json())
-	.then(res => renderCategories(res))
+	.then(res => renderCategories(res, display))
 
 }
 
-function renderCategories(json){
+function renderCategories(json, display){
 	const categoryHTML = json.map(object => {
 
 		new Category(object["category"].id, object["category"].title, object["clues"])
@@ -99,65 +103,67 @@ function renderCategories(json){
 	//Console logs all the clues
 	console.log(json)
 
-	board.html(categoryHTML)
+	display.board.html(categoryHTML)
 
-	board.on("click", "div.clue", function(e) {
+	display.board.on("click", "div.clue", function(e) {
 		e.stopImmediatePropagation()
 		const targetId = parseInt(this.id.split("-")[1])
 		const targetClue = Clue.all().find(clue => clue.id === targetId)
 
 		if(targetClue.shown) {
 
-			clueDisplay.show()
-			board.hide()
+			display.clue.show()
+			display.board.hide()
 
 			const questionHTML = `<h2>${targetClue.question.toUpperCase()}</h2>`
 			const responseHTML = `
 				<h2>${targetClue.category.title.toUpperCase()}</h2>
 				<br>
 				<br>
-				<form id="answer-form">
+				<form id="answer-form" autocomplete="off">
 					<p>What is
-					<input type="text" id="answer" class="input-large">
+					<input type="text" id="answer" autocomplete="off">
 					 ?</p>
 				</form>
 			`
 
 			if (targetClue.dd===true) {
 
-				timerDisplay.hide()
+				display.timer.hide()
 				const ddHTML = `
 					<p>You have selected a Daily Double! Please make a wager between $5 and $${maxWager()}</p>
 					<form id="wager-form">
 						<input type="number" id="wager">
 					</form>
 				`
-				const ddImage = `url(../images/dd.png)`
+				const ddImage = `url('/images/dd.png')`
 				// we are clearing previous question from display
-				questionDisplay.html("")
-				questionDisplay.css('background-image', ddImage)
-				inputDisplay.html(ddHTML)
+				display.question.html("")
+				display.question.css('background-image', ddImage)
+				display.input.html(ddHTML)
+        $("#wager").focus()
 
 				$('#wager-form').on("submit", function(e){
 					e.preventDefault()
+          $("#wager").blur()
 
 					const wagerValue = parseInt($('#wager').val())
 
 					if(!wagerValue || wagerValue > maxWager() || wagerValue < 5) {
 						alert("Please enter a valid wager.")
 					} else {
-						timerDisplay.show()
+						display.timer.show()
 						// we are resetting background image to nothing
-						questionDisplay.css('background-image', "")
+						display.question.css('background-image', "")
 						targetClue.value = wagerValue
 						$('#daily-double').html(`<p>You have wagered: $${targetClue.value}</p>`)
-						guess(questionHTML, responseHTML,targetClue)
+						guess(questionHTML, responseHTML,targetClue, display)
 					}
 
 				})
 
 			} else {
-				guess(questionHTML, responseHTML,targetClue)
+				guess(questionHTML, responseHTML,targetClue, display)
 			}
 			console.log(this)
 			targetClue.shown = false
@@ -168,11 +174,12 @@ function renderCategories(json){
 	})
 }
 
-function guess(questionHTML, responseHTML, targetClue){
+function guess(questionHTML, responseHTML, targetClue, display){
 
-		var newTimer = new Timer(targetClue)
-		questionDisplay.html(questionHTML)
-		inputDisplay.html(responseHTML)
+		var newTimer = new Timer(targetClue, display)
+		display.question.html(questionHTML)
+		display.input.html(responseHTML)
+    $('#answer').focus()
 
 		$('#answer-form').on("submit", function(e){
 			e.preventDefault()
@@ -188,7 +195,7 @@ function guess(questionHTML, responseHTML, targetClue){
 				alert(`Incorrect! The correct answer was "${targetClue.answer}." \nYou are now at ${scoreNormalizer()}`)
 			}
 			checkEndGame()
-			backToGame()
+			backToGame(display)
 
 			newTimer.stop()
 
@@ -197,11 +204,12 @@ function guess(questionHTML, responseHTML, targetClue){
 
 
 
-function backToGame(){
-	userDisplay.html(`${currentUser.name.toUpperCase()}: ${scoreNormalizer()}`)
-	clueDisplay.hide()
+function backToGame(display){
+  $("#answer").blur()
+  display.user.html(`${currentUser.name.toUpperCase()}: ${scoreNormalizer()}`)
+	display.clue.hide()
 	$('#daily-double').html("")
-	board.show()
+	display.board.show()
 
 }
 
