@@ -4,6 +4,8 @@ Rails.application.routes.draw do
   post '/game', to: 'games#create'
   post '/answer', to: 'games#answer'
   post '/wager', to: 'games#wager'
+  post '/clue', to: 'games#clue'
+  post '/endgame', to: 'games#endgame'
 
   namespace :api do
   	namespace :v1 do

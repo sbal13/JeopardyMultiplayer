@@ -41,6 +41,13 @@ function loadScreen(display){
 	})
 }
 
+function renderScoreboard(users) {
+  channelDisplay = new Display()
+  var gameUsersHTML = users.map(user=>{
+    return `<div class="col-md-4">${user.name.toUpperCase()}: ${scoreNormalizer(user)}</div>`
+  }).join("")
+  channelDisplay.user.html(gameUsersHTML)
+}
 
 function promptUsername(display){
 	const userForm = `
@@ -51,193 +58,44 @@ function promptUsername(display){
 	display.welcome.html(userForm)
   $('#username').focus()
 	$('#user-form').on('submit', function(event){
-		// event.preventDefault()
-		const userName = $('#username').val()
+		const userName = $('#username').val().toLowerCase()
 		currentUser = new User(userName)
-		// display.user.html(`${currentUser.name.toUpperCase()}: $${currentUser.score}`)
 		display.welcome.html("")
 		display.welcome.hide()
     $('#username').blur()
-		// setCategories(display)
-
 	})
 }
 
-
-//
-// function setCategories(display){
-//
-// 	fetch("http://localhost:3000/api/v1/categories")
-// 	.then(res=> res.json())
-// 	.then(res => renderCategories(res, display))
-//
-// }
-
-// function renderCategories(json, display){
-// 	const categoryHTML = json.map(object => {
-//
-// 		new Category(object["category"].id, object["category"].title, object["clues"])
-//
-// 		const cluesHTML = object["clues"].map(clue => {
-//
-// 			new Clue(clue.id, clue.question, clue.answer, clue.category_id, clue.value)
-//
-// 			return `
-// 				<div id="clue-${clue.id}" class="clue inline-middle">
-// 					<h3 class="text-center">$${clue.value}</h3>
-// 				</div>
-// 			`
-// 		}).join("")
-//
-// 		return `<div class="col-md-2">
-// 			<div class="category"><h4>${object["category"].title.toUpperCase()}</h4></div>
-// 			<div id="clues" class="">
-//
-// 				${cluesHTML}
-// 			</div>
-// 		</div>`
-// 	}).join("")
-//
-// 	Clue.makeDD()
-//
-// 	//Console logs all the clues
-// 	console.log(json)
-//
-// 	display.board.html(categoryHTML)
-//
-// 	display.board.on("click", "div.clue", function(e) {
-// 		e.stopImmediatePropagation()
-// 		const targetId = parseInt(this.id.split("-")[1])
-// 		const targetClue = Clue.all().find(clue => clue.id === targetId)
-//
-// 		if(targetClue.shown) {
-//
-// 			display.clue.show()
-// 			display.board.hide()
-//
-// 			const questionHTML = `<h2>${targetClue.question.toUpperCase()}</h2>`
-// 			const responseHTML = `
-// 				<h2>${targetClue.category.title.toUpperCase()}</h2>
-// 				<br>
-// 				<br>
-// 				<form id="answer-form" autocomplete="off">
-// 					<p>What is
-// 					<input type="text" id="answer" autocomplete="off">
-// 					 ?</p>
-// 				</form>
-// 			`
-//
-// 			if (targetClue.dd===true) {
-//
-// 				display.timer.hide()
-// 				const ddHTML = `
-// 					<p>You have selected a Daily Double! Please make a wager between $5 and $${maxWager()}</p>
-// 					<form id="wager-form">
-// 						<input type="number" id="wager">
-// 					</form>
-// 				`
-// 				const ddImage = `url('/images/dd.png')`
-// 				// we are clearing previous question from display
-// 				display.question.html("")
-// 				display.question.css('background-image', ddImage)
-// 				display.input.html(ddHTML)
-//         $("#wager").focus()
-//
-// 				$('#wager-form').on("submit", function(e){
-// 					e.preventDefault()
-//           $("#wager").blur()
-//
-// 					const wagerValue = parseInt($('#wager').val())
-//
-// 					if(!wagerValue || wagerValue > maxWager() || wagerValue < 5) {
-// 						alert("Please enter a valid wager.")
-// 					} else {
-// 						display.timer.show()
-// 						// we are resetting background image to nothing
-// 						display.question.css('background-image', "")
-// 						targetClue.value = wagerValue
-// 						$('#daily-double').html(`<p>You have wagered: $${targetClue.value}</p>`)
-// 						guess(questionHTML, responseHTML,targetClue, display)
-// 					}
-//
-// 				})
-//
-// 			} else {
-// 				guess(questionHTML, responseHTML,targetClue, display)
-// 			}
-// 			console.log(this)
-// 			targetClue.shown = false
-//
-// 			//This hides the value after question answered
-// 			this.innerHTML = ""
-// 		}
-// 	})
-// }
-
-function guess(questionHTML, responseHTML, targetClue, display){
-
-		var newTimer = new Timer(targetClue, display)
-		display.question.html(questionHTML)
-		display.input.html(responseHTML)
-    $('#answer').focus()
-
-		$('#answer-form').on("submit", function(e){
-			e.preventDefault()
-
-			let sanitizedInput = $('#answer').val().toLowerCase().trim()
-			let regex = sanitizedInput
-
-			if (sanitizedInput && targetClue.answer.toLowerCase().includes(sanitizedInput)) {
-				currentUser.score += targetClue.value
-				alert(`Correct! You now have ${scoreNormalizer()}`)
-			} else {
-				currentUser.score -= targetClue.value
-				alert(`Incorrect! The correct answer was "${targetClue.answer}." \nYou are now at ${scoreNormalizer()}`)
-			}
-			checkEndGame()
-			backToGame(display)
-
-			newTimer.stop()
-
-		})
-}
-
-
-
-function backToGame(display){
+function backToGame(users){
+  channelDisplay = new Display()
   $("#answer").blur()
-  display.user.html(`${currentUser.name.toUpperCase()}: ${scoreNormalizer()}`)
-	display.clue.hide()
-	$('#daily-double').html("")
-	display.board.show()
-
+  renderScoreboard(users)
+  channelDisplay.clue.hide()
+  $('#daily-double').html("")
+  channelDisplay.board.show()
 }
 
-function scoreNormalizer(){
-	if (currentUser.score < 0){
-		return `-$${-currentUser.score}`
-	} else {
-		return `$${currentUser.score}`
-	}
+function scoreNormalizer(user){
+  if (user.score < 0){
+    return `-$${-user.score}`
+  } else {
+    return `$${user.score}`
+  }
 }
 
-function maxWager(){
-	if (currentUser.score <= 1000) {
+function maxWager(user){
+	if (user.score <= 1000) {
 		return 1000
 	} else {
-		return currentUser.score
+		return user.score
 	}
 }
 
-function checkEndGame() {
-	const shownClues = Clue.all().filter(clue => clue.shown)
-	if(shownClues.length === 0) {
-		if(currentUser.score > 0) {
-			alert(`Congrats! You won $${currentUser.score}`)
-		} else {
-			alert(`Game over! You owe us $${-currentUser.score}`)
-		}
-		location.reload()
-	}
-
+function checkEndGame(users) {
+  const shownClues = Clue.all().filter(clue => clue.shown)
+  if(shownClues.length === 0) {
+    const winner = winner(users)
+    alert(`${winner.name} has won the game with ${scoreNormalizer(winner.score)}!`)
+    endGame()
+  }
 }

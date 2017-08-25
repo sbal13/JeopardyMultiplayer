@@ -5,6 +5,8 @@ class CreateClues < ActiveRecord::Migration[5.1]
       t.string :answer
       t.integer :category_id
       t.integer :value
+      t.boolean :dd, default: false
+      t.boolean :shown, default: true
 
       t.timestamps
     end
