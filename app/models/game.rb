@@ -10,23 +10,25 @@ class Game < ApplicationRecord
 		self.categories = Category.all.sample(6)
 		selected_clues = self.categories.map { |cat|
 						sort_clues = (1..5).to_a.map do |x|
-
 								cat.clues.select{ |clue| clue.value == 200*x}
-
 						end
 						
 						nil_clues = cat.clues.where(value: nil)
 
+						puts ("Nil Clues: #{nil_clues.count}")
 
 						final_clues = sort_clues.map.with_index{|clue_array, i|
-							chosen = clue_array.sample
-							if nil_clues.include?(chosen)
-								chosen.update(value: 200*i)
+							if clue_array.any?
+								clue_array.sample
 							else
+								chosen = nil_clues.sample
+								chosen.update(value: (200*i))
 								chosen
 							end
 						}
+
 					}.flatten
+
 		self.clues = selected_clues
 		self.clues.sample.update(dd: true)
 		self.save
